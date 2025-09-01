@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::env;
 use std::fs;
 use std::io;
@@ -35,9 +36,10 @@ fn main() {
 fn search_on_file<R: io::BufRead>(file: R, query: &String) {
     const HIGHLIGHT_COLOR: &str = "\x1b[31m";
     const RESET_COLOR: &str = "\x1b[0m";
-    let highlighted_query = format!("{}{}{}", HIGHLIGHT_COLOR, query, RESET_COLOR);
+    let highlighted_query = format!("{}{}{}", HIGHLIGHT_COLOR, "$0", RESET_COLOR);
 
     let mut found = false;
+    let regex = Regex::new(query).unwrap();
     for line_result in file.lines() {
         let line = match line_result {
             Ok(line) => line,
@@ -47,9 +49,8 @@ fn search_on_file<R: io::BufRead>(file: R, query: &String) {
             }
         };
 
-        if line.contains(query) {
-            let parts: Vec<&str> = line.split(query).collect();
-            let result = parts.join(&highlighted_query);
+        if regex.is_match(&line) {
+            let result = regex.replace_all(&line, &highlighted_query);
             println!("{}", result);
             found = true;
         }

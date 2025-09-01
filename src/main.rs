@@ -1,3 +1,4 @@
+use colored::*;
 use regex::Regex;
 use std::env;
 use std::fs;
@@ -5,6 +6,9 @@ use std::io;
 use std::process;
 
 fn main() {
+    #[cfg(windows)]
+    colored::control::set_virtual_terminal(true).unwrap();
+
     let args: Vec<String> = env::args().collect();
     match args.len() {
         3 => {
@@ -34,9 +38,7 @@ fn main() {
 }
 
 fn search_on_file<R: io::BufRead>(file: R, query: &String) {
-    const HIGHLIGHT_COLOR: &str = "\x1b[31m";
-    const RESET_COLOR: &str = "\x1b[0m";
-    let highlighted_query = format!("{}{}{}", HIGHLIGHT_COLOR, "$0", RESET_COLOR);
+    let highlighted_query = format!("{}", "$0".red());
 
     let mut found = false;
     let regex = Regex::new(query).unwrap();
